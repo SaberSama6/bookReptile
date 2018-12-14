@@ -7,4 +7,8 @@ module.exports = class extends think.Model {
     findBook(id) {
         return this.table("book").where(id).find();
     }
+    //修改书籍完整性
+    ChangeBookFull(id) {
+        return this.table("book").where({id}).update({isFull: 1})
+    }
 }

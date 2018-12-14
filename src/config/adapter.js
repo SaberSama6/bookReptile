@@ -42,8 +42,8 @@ exports.model = {
     host: '127.0.0.1',
     port: '3306',
     user: 'root',
-    password: 'yaw112212'
-    // dateStrings: true
+    password: 'yaw112212',
+    dateStrings: true
   }
 };
 
@@ -87,7 +87,7 @@ exports.view = {
  * @type {Object}
  */
 exports.logger = {
-  type: isDev ? 'console' : 'dateFile',
+  type: 'console',
   console: {
     handle: Console
   },
