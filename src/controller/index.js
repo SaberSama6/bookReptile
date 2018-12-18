@@ -12,14 +12,21 @@ module.exports = class extends think.Controller {
     if (isCli) {
       this.crawlBook();
     } else {
-      this.fail('该接口只支持在命令行调用~~~');
+      this.findAllChapter();
+      // this.fail('该接口只支持在命令行调用~~~');
     }
+  }
+
+  async findAllChapter() {
+    let data = await this.model('chapter').findAllChapter();
+    console.log(data);
+      this.success(data);
   }
 
   indexAction() {
     this.bookModel = this.model('book');
     this.chapterModel = this.model('chapter');
-    this.crawlBook();
+    // this.crawlBook();
   }
 
   sleep(time) {

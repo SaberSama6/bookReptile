@@ -1,3 +1,8 @@
 module.exports = [
-    // ['/book/index', 'index/index'],
+    ['/book/crawling', 'index/index'],
+    ['/user/add', 'user/add'],
+    ['/user/id', 'user/id'],  //第一参数匹配路由，第二参数匹配controller中的action。
+    ['/user/login', 'user/login'],
+    ['/user/isLogin', 'user/isLogin'],
+    ['/user/loginOut', 'user/loginOut']
 ];
