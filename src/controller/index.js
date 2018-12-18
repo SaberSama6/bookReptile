@@ -1,26 +1,20 @@
-const Base = require('./base.js');
 import rp from 'request-promise';
 import cheerio from 'cheerio';
 import books from './book';
 var myTime; //定时器变量，用于清除防止内存泄露。
 const bookPath_name = "https://www.81xzw.com"; //小说网公用网址，用于拼接。
-module.exports = class extends think.Controller {
+const BaseRest = require('./rest.js');
+
+module.exports = class extends BaseRest {
   constructor(ctx) {
     super(ctx); // 调用父级的 constructor 方法，并把 ctx 传递进去
     // 其他额外的操作 
-    const isCli = ctx.isCli;
-    if (isCli) {
-      this.crawlBook();
-    } else {
-      this.findAllChapter();
-      // this.fail('该接口只支持在命令行调用~~~');
-    }
   }
 
-  async findAllChapter() {
+  async findallchapterAction() {
     let data = await this.model('chapter').findAllChapter();
-    console.log(data);
-      this.success(data);
+    // console.log(data);
+    this.success(data);
   }
 
   indexAction() {
@@ -100,7 +94,7 @@ module.exports = class extends think.Controller {
         }
         think.logger.info("爬虫等待时间");
         await this.sleep(5000); //休息5秒，再次访问。防止封禁IP。
-        clearTimeout(myTime);  //清除定时器，优化内存。
+        clearTimeout(myTime); //清除定时器，优化内存。
         await this.crawlChapter(chapter);
       }
       if (bookIsfull) {
@@ -113,12 +107,7 @@ module.exports = class extends think.Controller {
 
   }
 
-  async crawlChapter({
-    bookId,
-    sork_key,
-    name,
-    url
-  }, content = "") {
+  async crawlChapter({bookId,sork_key,name,url}, content = "") {
     think.logger.info("开始抓取小说内容" + name + "---------------------");
     let options = {
       uri: url,
