@@ -19,16 +19,35 @@ module.exports = class extends think.Controller {
         } else {
             where.phone = Number(where.phone);
             let phoneWhere = { phone: where.phone }
-            let data = await this.user.getUserByfield(phoneWhere);
-            if (think.isEmpty(data)) {
-                where.password = Util.getSha1(where.password);
-                await this.user.addUser(where)
-                return this.success("注册成功");
-            } else {
+            if (!(/^1[34578]\d{9}$/.test(where.phone))) {
+                return this.fail('手机号格式错误');
+            }
+            if (!where.email || !(where.email.match(/^[A-Za-z0-9]+([-_.][A-Za-z0-9]+)*@([A-Za-z0-9]+[-.])+[A-Za-z0-9]{2,5}$/))) {
+                return this.fail('邮箱未填写，或者格式错误');
+            }
+
+            let phoneData = await this.user.getUserByfield(phoneWhere);
+            if (!think.isEmpty(phoneData)) {
                 return this.fail('此手机号已经被注册，请换个手机号注册！');
             }
+            let account = await this.user.getUserByfield({ name: where.name });
+            if (!think.isEmpty(account)) {
+                return this.fail('此账户已被注册，请换个账号');
+            }
+            let emailData = await this.user.getUserByfield({ email: where.email });
+            if (!think.isEmpty(emailData)) {
+                return this.fail('此邮箱已被注册，请换个邮箱');
+            }
+            //调用发送邮件插件
+            let emailSendSuccess =await Util.sendEail(where.email);
+            if (emailSendSuccess) {
+                // where.password = Util.getSha1(where.password);
+                // await this.user.addUser(where)
+                return this.success("注册成功");
+            }else{
+                return this.fail("注册失败");
+            }  
         }
-        return this.success("注册成功");
     }
 
     //登录账户

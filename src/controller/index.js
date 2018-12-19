@@ -14,15 +14,16 @@ module.exports = class extends BaseRest {
   async findallchapterAction() {
     let data = await this.model('chapter').findAllChapter();
     // console.log(data);
-    this.success(data);
+    return this.success(data);
   }
 
   indexAction() {
     this.bookModel = this.model('book');
     this.chapterModel = this.model('chapter');
-    // this.crawlBook();
+    this.crawlBook();
   }
 
+  //程序中断
   sleep(time) {
     return new Promise(resolve => {
       myTime = setTimeout(resolve, time);
