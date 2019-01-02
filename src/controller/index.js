@@ -9,20 +9,52 @@ module.exports = class extends BaseRest {
   constructor(ctx) {
     super(ctx); // 调用父级的 constructor 方法，并把 ctx 传递进去
     // 其他额外的操作 
-  }
-
-  async findallchapterAction() {
-    let data = await this.model('chapter').findAllChapter();
-    // console.log(data);
-    return this.success(data);
-  }
-
-  indexAction() {
     this.bookModel = this.model('book');
     this.chapterModel = this.model('chapter');
+    this.readHistory = this.model('readHistory');
+  }
+
+  
+
+  indexAction() {
     this.crawlBook();
   }
 
+  //查询章节列表
+  async findallchapterAction() {
+    let where=this.post();
+    let data = await this.chapterModel.findAllChapter(where);
+    return this.success(data);
+  }
+
+  //获取章节详情
+  async getChapterDetailAction() {
+    let where = this.post();
+    let presentData = await this.chapterModel.getChapterDetail(where);
+    let nextData = await this.chapterModel.getChapterDetail({ book_id:where.book_id,id: Number(where.id + 1) });
+    //存在下一章内容。
+    if (!think.isEmpty(nextData)) {
+      think.logger.info('找到下一章节内容');
+      presentData.nextId = nextData.id;
+    }
+    const userinfo = await this.session('userinfo');
+    let data = {
+      book_id: where.book_id,
+      chapter_id: where.id,
+      user_id:userinfo.id 
+    }
+    //存储阅读历史
+    await this.readHistory.updateReadHistory(data, { user_id:userinfo.id, book_id: where.book_id});
+    return this.success(presentData);
+  }
+
+  //获取书籍列表
+  async getBookListAction() {
+    let data = await this.bookModel.findAllBook();
+    return this.success(data);
+  }
+
+  
   //程序中断
   sleep(time) {
     return new Promise(resolve => {

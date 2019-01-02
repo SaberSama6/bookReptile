@@ -10,8 +10,14 @@ module.exports = class extends think.Model {
     findChapter(name) {
         return this.where({ chapterName:name }).find();
     }
+    //获取章节详情
+    getChapterDetail(where) {
+        return this.where(where).find();
+    }
     //查询所有章节列表
-    findAllChapter() {
-        return this.where({ book_id: 1 }).order("sork_key Asc").page(1,10).countSelect();
+    findAllChapter(where) {
+        where.currentPage = where.currentPage || 1;
+        where.pageSize = where.pageSize || 10;
+        return this.where({ book_id: where.id }).order("sork_key Asc").page(where.currentPage,where.pageSize).countSelect();
     }
 }
