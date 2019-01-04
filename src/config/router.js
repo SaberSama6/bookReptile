@@ -3,6 +3,7 @@ module.exports = [
     ['/book/findAllChapter', 'index/findallchapter'],
     ['/book/getBookList', 'index/getBookList'],
     ['/book/getChapterDetail', 'index/getChapterDetail'],
+    ['/book/continueRead', 'index/continueRead'],
     ['/user/add', 'user/add'],
     ['/user/id', 'user/id'],  //第一参数匹配路由，第二参数匹配controller中的action。
     ['/user/login', 'user/login'],

@@ -14,7 +14,7 @@ module.exports = class extends BaseRest {
     this.readHistory = this.model('readHistory');
   }
 
-  
+
 
   indexAction() {
     this.crawlBook();
@@ -22,7 +22,7 @@ module.exports = class extends BaseRest {
 
   //查询章节列表
   async findallchapterAction() {
-    let where=this.post();
+    let where = this.post();
     let data = await this.chapterModel.findAllChapter(where);
     return this.success(data);
   }
@@ -31,7 +31,10 @@ module.exports = class extends BaseRest {
   async getChapterDetailAction() {
     let where = this.post();
     let presentData = await this.chapterModel.getChapterDetail(where);
-    let nextData = await this.chapterModel.getChapterDetail({ book_id:where.book_id,id: Number(where.id + 1) });
+    let nextData = await this.chapterModel.getChapterDetail({
+      book_id: where.book_id,
+      sork_key: Number(presentData.sork_key + 1)
+    });
     //存在下一章内容。
     if (!think.isEmpty(nextData)) {
       think.logger.info('找到下一章节内容');
@@ -41,20 +44,49 @@ module.exports = class extends BaseRest {
     let data = {
       book_id: where.book_id,
       chapter_id: where.id,
-      user_id:userinfo.id 
+      user_id: userinfo.id
     }
     //存储阅读历史
-    await this.readHistory.updateReadHistory(data, { user_id:userinfo.id, book_id: where.book_id});
+    await this.readHistory.updateReadHistory(data, {
+      user_id: userinfo.id,
+      book_id: where.book_id
+    });
     return this.success(presentData);
+  }
+
+  //查询历史并且处理返回数据。
+  //  data: function 数据列表
+  async readHistoryFuc(data) {
+    const userinfo = await this.session('userinfo');
+    let that=this
+    let readPomise = new Promise(async function (resolve, reject) {
+      for (let i = 0; i < data.data.length; i++){
+        let readHistoryData = await that.readHistory.findReadHistory({
+          book_id: data.data[i].id,
+          user_id: userinfo.id
+        });
+        if (!think.isEmpty(readHistoryData)) {
+          //有历史记录
+          data.data[i]['storyId'] = readHistoryData.chapter_id;
+        } else {
+          //没有查询到历史记录
+        }
+        if (i == data.data.length - 1) {
+          resolve(data.data);
+        }
+      }
+    });
+    return readPomise;
   }
 
   //获取书籍列表
   async getBookListAction() {
     let data = await this.bookModel.findAllBook();
+    let newData=await this.readHistoryFuc(data)
     return this.success(data);
   }
 
-  
+
   //程序中断
   sleep(time) {
     return new Promise(resolve => {
@@ -140,7 +172,12 @@ module.exports = class extends BaseRest {
 
   }
 
-  async crawlChapter({bookId,sork_key,name,url}, content = "") {
+  async crawlChapter({
+    bookId,
+    sork_key,
+    name,
+    url
+  }, content = "") {
     think.logger.info("开始抓取小说内容" + name + "---------------------");
     let options = {
       uri: url,

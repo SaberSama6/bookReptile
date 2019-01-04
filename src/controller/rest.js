@@ -20,7 +20,7 @@ module.exports = class extends think.Controller {
     const data = await this.session('userinfo');
     if (!think.isEmpty(data)) {
         //在登录状态。
-        return true;
+      return true;
     } else {
         //不在登录状态
         return false;
