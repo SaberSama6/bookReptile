@@ -80,5 +80,6 @@ module.exports = class extends think.Controller {
     //注销登录
     async loginOutAction() {
         await this.session(null);
+        return this.success("退出登录");
     }
 };
